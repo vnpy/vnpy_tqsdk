@@ -44,3 +44,12 @@ pip install vnpy_tqsdk
 ```
 python setup.py install
 ```
+
+## 使用
+
+在VN Trader中配置时，需要填写以下字段信息：
+
+| 字段名            | 值 |
+|---------           |---- |
+|datafeed.username   | 用户名|
+|datafeed.password   | 密码|
