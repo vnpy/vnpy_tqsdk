@@ -58,12 +58,7 @@ class TqsdkDatafeed(BaseDatafeed):
             return False
 
         if not self.symbols:
-            stocks = self.api.query_quotes(ins_class="STOCK")
-            futures = self.api.query_quotes(ins_class="FUTURE")
-            cont = self.api.query_quotes(ins_class="CONT")
-            self.symbols = stocks
-            self.symbols.extend(futures)
-            self.symbols.extend(cont)
+            self.symbols = [k for k, v in self.api._data["quotes"].items()]
 
         self.inited = True
         return True
@@ -80,10 +75,8 @@ class TqsdkDatafeed(BaseDatafeed):
         end = req.end
 
         tq_symbol = to_tq_symbol(symbol, exchange)
-        print(self.symbols)
         if tq_symbol not in self.symbols:
-            # return None
-            pass
+            return None
 
         tq_interval = INTERVAL_VT2TQ.get(interval)
         if not tq_interval:
@@ -134,8 +127,7 @@ class TqsdkDatafeed(BaseDatafeed):
 
         tq_symbol = to_tq_symbol(symbol, exchange)
         if tq_symbol not in self.symbols:
-            # return None
-            pass
+            return None
 
         if req.interval is not Interval.TICK:
             return None
