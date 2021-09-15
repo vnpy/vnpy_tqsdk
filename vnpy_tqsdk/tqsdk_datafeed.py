@@ -17,13 +17,6 @@ INTERVAL_VT2TQ = {
     Interval.TICK: 0
 }
 
-INTERVAL_ADJUSTMENT_MAP = {
-    Interval.MINUTE: timedelta(minutes=1),
-    Interval.HOUR: timedelta(hours=1),
-    Interval.DAILY: timedelta()
-}
-
-
 CHINA_TZ = timezone("Asia/Shanghai")
 
 
@@ -74,6 +67,8 @@ class TqsdkDatafeed(BaseDatafeed):
         start = req.start
         end = req.end
 
+        print(start)
+
         tq_symbol = to_tq_symbol(symbol, exchange)
         if tq_symbol not in self.symbols:
             return None
@@ -82,9 +77,6 @@ class TqsdkDatafeed(BaseDatafeed):
         if not tq_interval:
             return None
 
-        # 为了将天勤时间戳（K线结束时点）转换为vn.py时间戳（K线开始时点）
-        adjustment = INTERVAL_ADJUSTMENT_MAP[interval]
-
         # 为了查询夜盘数据
         end += timedelta(1)
 
@@ -92,13 +84,15 @@ class TqsdkDatafeed(BaseDatafeed):
                                             start_dt=start, end_dt=end)
 
         self.api.close()
+        print(df)
         self.inited = False
 
         data: List[BarData] = []
 
         if df is not None:
             for ix, row in df.iterrows():
-                dt = pd.Timestamp(row["datetime"]).to_pydatetime() - adjustment
+                # 天勤时间为与1970年北京时间相差的秒数，需要加上8小时差
+                dt = pd.Timestamp(row["datetime"]).to_pydatetime() + timedelta(hours=8)
                 bar = BarData(
                     symbol=symbol,
                     exchange=exchange,
@@ -144,7 +138,8 @@ class TqsdkDatafeed(BaseDatafeed):
 
         if df is not None:
             for ix, row in df.iterrows():
-                dt = pd.Timestamp(row["datetime"]).to_pydatetime()
+                # 天勤时间为与1970年北京时间相差的秒数，需要加上8小时差
+                dt = pd.Timestamp(row["datetime"]).to_pydatetime() + timedelta(hours=8)
                 tick = TickData(
                     symbol=symbol,
                     exchange=exchange,
@@ -167,14 +162,14 @@ class TqsdkDatafeed(BaseDatafeed):
 tqdf = TqsdkDatafeed()
 
 his = HistoryRequest(
-    symbol="cu1805",
+    symbol="cu2109",
     exchange=Exchange("SHFE"),
-    start=datetime(2018, 1, 1, 6, 0, 0),
-    end=datetime(2018, 6, 1, 16, 0, 0),
-    interval=Interval("1m")
+    start=datetime(2021, 9, 9, 0, 0, 0),
+    end=datetime(2021, 9, 14, 0, 0, 0),
+    interval=Interval("1h")
 )
 bars = tqdf.query_bar_history(his)
-print(bars[1])
+print(bars)
 
 his = HistoryRequest(
     symbol="T1809",
