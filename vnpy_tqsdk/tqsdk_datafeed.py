@@ -9,7 +9,7 @@ from tqsdk import TqApi, TqAuth
 from vnpy.trader.datafeed import BaseDatafeed
 from vnpy.trader.setting import SETTINGS
 from vnpy.trader.constant import Interval
-from vnpy.trader.object import BarData, TickData, HistoryRequest
+from vnpy.trader.object import BarData, HistoryRequest
 
 
 INTERVAL_VT2TQ = {

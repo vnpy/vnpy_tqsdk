@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-    <img src ="https://img.shields.io/badge/version-2.8.5-blueviolet.svg"/>
+    <img src ="https://img.shields.io/badge/version-2.8.6-blueviolet.svg"/>
     <img src ="https://img.shields.io/badge/platform-windows|linux|macos-yellow.svg"/>
     <img src ="https://img.shields.io/badge/python-3.7-blue.svg"/>
     <img src ="https://img.shields.io/github/license/vnpy/vnpy.svg?color=orange"/>
@@ -13,7 +13,7 @@
 
 ## 说明
 
-基于天勤TQSDK模块的2.8.5版本开发，支持以下中国金融市场的K线数据：
+基于天勤TQSDK模块的2.8.6版本开发，支持以下中国金融市场的K线数据：
 
 * 期货：
   * CFFEX：中国金融期货交易所
@@ -25,7 +25,7 @@
   * SSE：上海证券交易所
   * SZSE：深圳证券交易所
 
-注意：需要使用相应的数据服务权限，可以通过[该页面](https://www.shinnytech.com/tqsdk_professional/)注册使用。
+注意：需要使用相应的数据服务权限，可以通过[该页面](https://www.shinnytech.com/tqsdk_professional/)申请试用或者付费购买。
 
 
 ## 安装
@@ -47,9 +47,10 @@ python setup.py install
 
 ## 使用
 
-在VN Trader中配置时，需要填写以下字段信息：
+在vn.py中使用天勤TQSDK时，需要在全局配置中填写以下字段信息：
 
-| 字段名            | 值 |
-|---------           |---- |
-|datafeed.username   | 用户名|
-|datafeed.password   | 密码|
+|名称|含义|必填|举例|
+|---------|----|---|---|
+|datafeed.name|名称|是|tqsdk|
+|datafeed.username|用户名|是|test|
+|datafeed.password|密码|是|12345678|
