@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import timedelta
 from typing import List, Optional
 from pytz import timezone
 import pandas as pd
@@ -7,7 +7,7 @@ from tqsdk import TqApi, TqAuth
 
 from vnpy.trader.datafeed import BaseDatafeed
 from vnpy.trader.setting import SETTINGS
-from vnpy.trader.constant import Interval, Exchange
+from vnpy.trader.constant import Interval
 from vnpy.trader.object import BarData, TickData, HistoryRequest
 
 INTERVAL_VT2TQ = {
@@ -47,7 +47,7 @@ class TqsdkDatafeed(BaseDatafeed):
 
         try:
             self.api = TqApi(auth=TqAuth(self.username, self.password))
-        except:
+        except Exception:
             return False
 
         if not self.symbols:
@@ -67,8 +67,6 @@ class TqsdkDatafeed(BaseDatafeed):
         start = req.start
         end = req.end
 
-        print(start)
-
         tq_symbol = to_tq_symbol(symbol, exchange)
         if tq_symbol not in self.symbols:
             return None
@@ -84,7 +82,7 @@ class TqsdkDatafeed(BaseDatafeed):
                                             start_dt=start, end_dt=end)
 
         self.api.close()
-        print(df)
+
         self.inited = False
 
         data: List[BarData] = []
@@ -157,26 +155,3 @@ class TqsdkDatafeed(BaseDatafeed):
                 )
                 data.append(tick)
         return data
-
-
-tqdf = TqsdkDatafeed()
-
-his = HistoryRequest(
-    symbol="cu2109",
-    exchange=Exchange("SHFE"),
-    start=datetime(2021, 9, 9, 0, 0, 0),
-    end=datetime(2021, 9, 14, 0, 0, 0),
-    interval=Interval("1h")
-)
-bars = tqdf.query_bar_history(his)
-print(bars)
-
-his = HistoryRequest(
-    symbol="T1809",
-    exchange=Exchange("CFFEX"),
-    start=datetime(2018, 6, 25),
-    end=datetime(2018, 7, 1),
-    interval=Interval("tick")
-)
-ticks = tqdf.query_tick_history(his)
-print(ticks[1])
