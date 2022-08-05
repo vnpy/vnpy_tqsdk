@@ -1,6 +1,5 @@
 from datetime import timedelta
 from typing import Dict, List, Optional
-from pytz import timezone
 import traceback
 
 from pandas import DataFrame, Timestamp
@@ -10,6 +9,7 @@ from vnpy.trader.datafeed import BaseDatafeed
 from vnpy.trader.setting import SETTINGS
 from vnpy.trader.constant import Interval
 from vnpy.trader.object import BarData, HistoryRequest
+from vnpy.trader.utility import ZoneInfo
 
 
 INTERVAL_VT2TQ: Dict[Interval, int] = {
@@ -19,7 +19,7 @@ INTERVAL_VT2TQ: Dict[Interval, int] = {
     Interval.TICK: 0
 }
 
-CHINA_TZ = timezone("Asia/Shanghai")
+CHINA_TZ = ZoneInfo("Asia/Shanghai")
 
 
 class TqsdkDatafeed(BaseDatafeed):
@@ -64,7 +64,7 @@ class TqsdkDatafeed(BaseDatafeed):
                     symbol=req.symbol,
                     exchange=req.exchange,
                     interval=req.interval,
-                    datetime=CHINA_TZ.localize(dt),
+                    datetime=dt.replace(tzinfo=CHINA_TZ),
                     open_price=tp.open,
                     high_price=tp.high,
                     low_price=tp.low,
