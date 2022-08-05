@@ -1,9 +1,9 @@
 from datetime import timedelta
-from typing import List, Optional
+from typing import Dict, List, Optional
 from pytz import timezone
 import traceback
 
-import pandas as pd
+from pandas import DataFrame, Timestamp
 from tqsdk import TqApi, TqAuth
 
 from vnpy.trader.datafeed import BaseDatafeed
@@ -12,7 +12,7 @@ from vnpy.trader.constant import Interval
 from vnpy.trader.object import BarData, HistoryRequest
 
 
-INTERVAL_VT2TQ = {
+INTERVAL_VT2TQ: Dict[Interval, int] = {
     Interval.MINUTE: 60,
     Interval.HOUR: 60 * 60,
     Interval.DAILY: 60 * 60 * 24,
@@ -34,15 +34,15 @@ class TqsdkDatafeed(BaseDatafeed):
         """查询k线数据"""
         # 初始化API
         try:
-            api = TqApi(auth=TqAuth(self.username, self.password))
+            api: TqApi = TqApi(auth=TqAuth(self.username, self.password))
         except Exception:
             traceback.print_exc()
             return None
 
         # 查询数据
-        tq_symbol = f"{req.exchange.value}.{req.symbol}"
+        tq_symbol: str = f"{req.exchange.value}.{req.symbol}"
 
-        df: pd.DataFrame = api.get_kline_data_series(
+        df: DataFrame = api.get_kline_data_series(
             symbol=tq_symbol,
             duration_seconds=INTERVAL_VT2TQ[req.interval],
             start_dt=req.start,
@@ -58,9 +58,9 @@ class TqsdkDatafeed(BaseDatafeed):
         if df is not None:
             for tp in df.itertuples():
                 # 天勤时间为与1970年北京时间相差的秒数，需要加上8小时差
-                dt = pd.Timestamp(tp.datetime).to_pydatetime() + timedelta(hours=8)
+                dt: Timestamp = Timestamp(tp.datetime).to_pydatetime() + timedelta(hours=8)
 
-                bar = BarData(
+                bar: BarData = BarData(
                     symbol=req.symbol,
                     exchange=req.exchange,
                     interval=req.interval,
