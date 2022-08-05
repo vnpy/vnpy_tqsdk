@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-    <img src ="https://img.shields.io/badge/version-2.8.6-blueviolet.svg"/>
+    <img src ="https://img.shields.io/badge/version-3.2.11-blueviolet.svg"/>
     <img src ="https://img.shields.io/badge/platform-windows|linux|macos-yellow.svg"/>
     <img src ="https://img.shields.io/badge/python-3.7-blue.svg"/>
     <img src ="https://img.shields.io/github/license/vnpy/vnpy.svg?color=orange"/>
@@ -13,7 +13,7 @@
 
 ## 说明
 
-基于天勤TQSDK模块的2.8.6版本开发，支持以下中国金融市场的K线数据：
+基于天勤TQSDK模块的3.2.11版本开发，支持以下中国金融市场的K线数据：
 
 * 期货：
   * CFFEX：中国金融期货交易所
