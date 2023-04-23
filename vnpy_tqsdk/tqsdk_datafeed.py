@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Callable
 import traceback
 
 from pandas import DataFrame, Timestamp
@@ -30,13 +30,13 @@ class TqsdkDatafeed(BaseDatafeed):
         self.username: str = SETTINGS["datafeed.username"]
         self.password: str = SETTINGS["datafeed.password"]
 
-    def query_bar_history(self, req: HistoryRequest) -> Optional[List[BarData]]:
+    def query_bar_history(self, req: HistoryRequest, output: Callable = print) -> Optional[List[BarData]]:
         """查询k线数据"""
         # 初始化API
         try:
             api: TqApi = TqApi(auth=TqAuth(self.username, self.password))
         except Exception:
-            traceback.print_exc()
+            output(traceback.format_exc())
             return None
 
         # 查询数据
