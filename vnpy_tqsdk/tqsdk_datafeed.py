@@ -15,8 +15,7 @@ from vnpy.trader.utility import ZoneInfo
 INTERVAL_VT2TQ: Dict[Interval, int] = {
     Interval.MINUTE: 60,
     Interval.HOUR: 60 * 60,
-    Interval.DAILY: 60 * 60 * 24,
-    Interval.TICK: 0
+    Interval.DAILY: 60 * 60 * 24
 }
 
 CHINA_TZ = ZoneInfo("Asia/Shanghai")
@@ -40,11 +39,16 @@ class TqsdkDatafeed(BaseDatafeed):
             return None
 
         # 查询数据
+        interval: str = INTERVAL_VT2TQ.get(req.interval, None)
+        if not interval:
+            output(f"Tqsdk查询K线数据失败：不支持的时间周期{req.interval.value}")
+            return []
+
         tq_symbol: str = f"{req.exchange.value}.{req.symbol}"
 
         df: DataFrame = api.get_kline_data_series(
             symbol=tq_symbol,
-            duration_seconds=INTERVAL_VT2TQ[req.interval],
+            duration_seconds=interval,
             start_dt=req.start,
             end_dt=(req.end + timedelta(1))
         )
