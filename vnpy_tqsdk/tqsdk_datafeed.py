@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Dict, List, Optional, Callable
+from collections.abc import Callable
 import traceback
 
 from pandas import DataFrame, Timestamp
@@ -12,7 +12,7 @@ from vnpy.trader.object import BarData, HistoryRequest
 from vnpy.trader.utility import ZoneInfo
 
 
-INTERVAL_VT2TQ: Dict[Interval, int] = {
+INTERVAL_VT2TQ: dict[Interval, int] = {
     Interval.MINUTE: 60,
     Interval.HOUR: 60 * 60,
     Interval.DAILY: 60 * 60 * 24
@@ -29,7 +29,7 @@ class TqsdkDatafeed(BaseDatafeed):
         self.username: str = SETTINGS["datafeed.username"]
         self.password: str = SETTINGS["datafeed.password"]
 
-    def query_bar_history(self, req: HistoryRequest, output: Callable = print) -> Optional[List[BarData]]:
+    def query_bar_history(self, req: HistoryRequest, output: Callable = print) -> list[BarData] | None:
         """查询k线数据"""
         # 初始化API
         try:
@@ -57,7 +57,7 @@ class TqsdkDatafeed(BaseDatafeed):
         api.close()
 
         # 解析数据
-        bars: List[BarData] = []
+        bars: list[BarData] = []
 
         if df is not None:
             for tp in df.itertuples():
