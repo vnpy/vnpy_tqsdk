@@ -24,7 +24,7 @@ CHINA_TZ = ZoneInfo("Asia/Shanghai")
 class TqsdkDatafeed(BaseDatafeed):
     """天勤TQsdk数据服务接口"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """"""
         self.username: str = SETTINGS["datafeed.username"]
         self.password: str = SETTINGS["datafeed.password"]
@@ -39,7 +39,7 @@ class TqsdkDatafeed(BaseDatafeed):
             return None
 
         # 查询数据
-        interval: str = INTERVAL_VT2TQ.get(req.interval, None)
+        interval: int | None = INTERVAL_VT2TQ.get(req.interval, None)
         if not interval:
             output(f"Tqsdk查询K线数据失败：不支持的时间周期{req.interval.value}")
             return []
