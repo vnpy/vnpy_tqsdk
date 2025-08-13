@@ -1,8 +1,8 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from collections.abc import Callable
 import traceback
 
-from pandas import DataFrame, Timestamp
+from pandas import DataFrame
 from tqsdk import TqApi, TqAuth
 
 from vnpy.trader.datafeed import BaseDatafeed
@@ -61,14 +61,11 @@ class TqsdkDatafeed(BaseDatafeed):
 
         if df is not None:
             for tp in df.itertuples():
-                # 天勤时间为与1970年北京时间相差的秒数，需要加上8小时差
-                dt: Timestamp = Timestamp(tp.datetime).to_pydatetime() + timedelta(hours=8)
-
                 bar: BarData = BarData(
                     symbol=req.symbol,
                     exchange=req.exchange,
                     interval=req.interval,
-                    datetime=dt.replace(tzinfo=CHINA_TZ),
+                    datetime=datetime.fromtimestamp(tp.datetime/1_000_000_000, tz=CHINA_TZ),
                     open_price=tp.open,
                     high_price=tp.high,
                     low_price=tp.low,
