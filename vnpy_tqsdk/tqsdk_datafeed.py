@@ -65,7 +65,7 @@ class TqsdkDatafeed(BaseDatafeed):
                     symbol=req.symbol,
                     exchange=req.exchange,
                     interval=req.interval,
-                    datetime=datetime.fromtimestamp(tp.datetime/1_000_000_000, tz=CHINA_TZ),
+                    datetime=datetime.fromtimestamp(tp.datetime/1_000_000_000, tz=CHINA_TZ),    # type: ignore
                     open_price=tp.open,
                     high_price=tp.high,
                     low_price=tp.low,
