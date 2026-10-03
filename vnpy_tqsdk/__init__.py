@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+"""天勤Tqsdk历史数据服务。"""
 
 from .tqsdk_datafeed import TqsdkDatafeed as Datafeed
 

@@ -1,3 +1,5 @@
+"""天勤Tqsdk历史数据服务实现。"""
+
 from datetime import timedelta, datetime
 from collections.abc import Callable
 import traceback
@@ -25,7 +27,7 @@ class TqsdkDatafeed(BaseDatafeed):
     """天勤TQsdk数据服务接口"""
 
     def __init__(self) -> None:
-        """"""
+        """读取数据服务账号。"""
         self.username: str = SETTINGS["datafeed.username"]
         self.password: str = SETTINGS["datafeed.password"]
 
