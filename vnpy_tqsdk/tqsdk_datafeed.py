@@ -1,7 +1,7 @@
 """天勤Tqsdk历史数据服务实现。"""
 
 from datetime import timedelta, datetime
-from typing import cast
+from typing import Any, cast
 from collections.abc import Callable
 import traceback
 
@@ -21,7 +21,7 @@ INTERVAL_VT2TQ: dict[Interval, int] = {
     Interval.DAILY: 60 * 60 * 24
 }
 
-CHINA_TZ = ZoneInfo("Asia/Shanghai")
+CHINA_TZ: ZoneInfo = ZoneInfo("Asia/Shanghai")
 
 
 def _as_float(value: object) -> float:
@@ -73,6 +73,8 @@ class TqsdkDatafeed(BaseDatafeed):
         bars: list[BarData] = []
 
         if df is not None:
+            # itertuples 静态类型是 tuple，列字段无法命名
+            tp: Any
             for tp in df.itertuples():
                 bar: BarData = BarData(
                     symbol=req.symbol,
