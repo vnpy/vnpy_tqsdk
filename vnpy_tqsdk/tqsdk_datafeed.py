@@ -1,6 +1,7 @@
 """天勤Tqsdk历史数据服务实现。"""
 
 from datetime import timedelta, datetime
+from typing import cast
 from collections.abc import Callable
 import traceback
 
@@ -23,6 +24,15 @@ INTERVAL_VT2TQ: dict[Interval, int] = {
 CHINA_TZ = ZoneInfo("Asia/Shanghai")
 
 
+def _as_float(value: object) -> float:
+    """
+    把 pandas 单元格视为 float。
+
+    itertuples 的字段在类型上是巨大联合，运行时天勤 K 线字段是数值。
+    """
+    return cast(float, value)
+
+
 class TqsdkDatafeed(BaseDatafeed):
     """天勤TQsdk数据服务接口"""
 
@@ -31,19 +41,20 @@ class TqsdkDatafeed(BaseDatafeed):
         self.username: str = SETTINGS["datafeed.username"]
         self.password: str = SETTINGS["datafeed.password"]
 
-    def query_bar_history(self, req: HistoryRequest, output: Callable = print) -> list[BarData] | None:
+    def query_bar_history(self, req: HistoryRequest, output: Callable = print) -> list[BarData]:
         """查询k线数据"""
         # 初始化API
         try:
             api: TqApi = TqApi(auth=TqAuth(self.username, self.password))
         except Exception:
             output(traceback.format_exc())
-            return None
+            return []
 
         # 查询数据
-        interval: int | None = INTERVAL_VT2TQ.get(req.interval, None)
+        vt_interval: Interval = cast(Interval, req.interval)
+        interval: int | None = INTERVAL_VT2TQ.get(vt_interval, None)
         if not interval:
-            output(f"Tqsdk查询K线数据失败：不支持的时间周期{req.interval.value}")
+            output(f"Tqsdk查询K线数据失败：不支持的时间周期{vt_interval.value}")
             return []
 
         tq_symbol: str = f"{req.exchange.value}.{req.symbol}"
@@ -52,7 +63,7 @@ class TqsdkDatafeed(BaseDatafeed):
             symbol=tq_symbol,
             duration_seconds=interval,
             start_dt=req.start,
-            end_dt=(req.end + timedelta(1))
+            end_dt=(cast(datetime, req.end) + timedelta(1))
         )
 
         # 关闭API
@@ -67,13 +78,13 @@ class TqsdkDatafeed(BaseDatafeed):
                     symbol=req.symbol,
                     exchange=req.exchange,
                     interval=req.interval,
-                    datetime=datetime.fromtimestamp(tp.datetime/1_000_000_000, tz=CHINA_TZ),    # type: ignore
-                    open_price=tp.open,
-                    high_price=tp.high,
-                    low_price=tp.low,
-                    close_price=tp.close,
-                    volume=tp.volume,
-                    open_interest=tp.open_oi,
+                    datetime=datetime.fromtimestamp(_as_float(tp.datetime) / 1_000_000_000, tz=CHINA_TZ),
+                    open_price=_as_float(tp.open),
+                    high_price=_as_float(tp.high),
+                    low_price=_as_float(tp.low),
+                    close_price=_as_float(tp.close),
+                    volume=_as_float(tp.volume),
+                    open_interest=_as_float(tp.open_oi),
                     gateway_name="TQ",
                 )
                 bars.append(bar)
