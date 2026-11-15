@@ -23,6 +23,9 @@ INTERVAL_VT2TQ: dict[Interval, int] = {
 
 CHINA_TZ: ZoneInfo = ZoneInfo("Asia/Shanghai")
 
+# 免费版 get_kline_serial 单次最多返回的K线数量
+FREE_DATA_LENGTH: int = 10000
+
 
 def _as_float(value: object) -> float:
     """
@@ -58,13 +61,21 @@ class TqsdkDatafeed(BaseDatafeed):
             return []
 
         tq_symbol: str = f"{req.exchange.value}.{req.symbol}"
+        end: datetime = cast(datetime, req.end) + timedelta(1)
 
-        df: DataFrame = api.get_kline_data_series(
-            symbol=tq_symbol,
-            duration_seconds=interval,
-            start_dt=req.start,
-            end_dt=(cast(datetime, req.end) + timedelta(1))
-        )
+        # 专业版（tq_dl权限）按时间段下载，免费版只能获取最近的K线
+        pro: bool = api._auth._has_feature("tq_dl")
+        if pro:
+            df: DataFrame = api.get_kline_data_series(
+                symbol=tq_symbol,
+                duration_seconds=interval,
+                start_dt=req.start,
+                end_dt=end
+            )
+        else:
+            df = api.get_kline_serial(tq_symbol, interval, data_length=FREE_DATA_LENGTH)
+            # 去掉开头的填充行和最后一根正在形成的K线
+            df = df[df["datetime"] > 0].iloc[:-1]
 
         # 关闭API
         api.close()
@@ -91,4 +102,18 @@ class TqsdkDatafeed(BaseDatafeed):
                 )
                 bars.append(bar)
 
+        if not pro:
+            start: datetime = _to_china_time(req.start)
+            end = _to_china_time(end)
+
+            if bars and start < bars[0].datetime:
+                output(f"Tqsdk免费版只能获取最近{FREE_DATA_LENGTH}根K线，本次数据从{bars[0].datetime:%Y-%m-%d %H:%M:%S}开始")
+
+            bars = [bar for bar in bars if start <= bar.datetime < end]
+
         return bars
+
+
+def _to_china_time(dt: datetime) -> datetime:
+    """无时区的时间按北京时间处理（与tqsdk一致）"""
+    return dt if dt.tzinfo else dt.replace(tzinfo=CHINA_TZ)
